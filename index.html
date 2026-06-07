@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NLPCC 2026 Shared Task 10: Reliability of AI-Assisted Scientific Reporting</title>
+    <style>
+      :root {
+        --primary: #0b5fff;
+        --primary2: #6a5cff;
+        --primary3: #7c3aed;
+        --text: #0f172a;
+        --muted: #475569;
+        --border: rgba(15, 23, 42, 0.12);
+        --shadow: 0 14px 40px rgba(2, 6, 23, 0.08);
+        --card: #ffffff;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "PingFang SC",
+          "Microsoft YaHei", sans-serif;
+        line-height: 1.6;
+        color: var(--text);
+        background:
+          radial-gradient(900px 420px at 12% 0%, rgba(11, 95, 255, 0.12), transparent 55%),
+          radial-gradient(800px 520px at 82% 18%, rgba(124, 58, 237, 0.10), transparent 50%),
+          #f6f8ff;
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 56px 20px;
+      }
+      .page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 26px 20px 60px;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: rgba(46, 109, 155, 0.8);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+      }
+      .topbar-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .brand-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+        text-decoration: none;
+        color: var(--text);
+        letter-spacing: 0.2px;
+      }
+      .topbar .brand-link {
+        color: #ffffff;
+      }
+      .topbar-logo {
+        height: 34px;
+        width: auto;
+        display: block;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-left: 20px;
+        flex: 1;
+      }
+      .nav-dropdown {
+        position: relative;
+        display: inline-block;
+      }
+      .nav-dropbtn {
+        background: transparent;
+        color: #fff;
+        border: none;
+        padding: 8px 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        opacity: 0.85;
+        transition: opacity 0.2s;
+      }
+      .nav-dropbtn:hover {
+        opacity: 1;
+      }
+      .nav-dropbtn::after {
+        content: "";
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 4px solid #fff;
+        margin-top: 2px;
+      }
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: #fff;
+        min-width: 160px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        border-radius: 8px;
+        overflow: hidden;
+        z-index: 1001;
+      }
+      .dropdown-content a {
+        color: #333;
+        padding: 10px 16px;
+        text-decoration: none;
+        display: block;
+        font-size: 13px;
+        transition: background 0.2s;
+      }
+      .dropdown-content a:hover {
+        background-color: #f1f5f9;
+      }
+      .nav-dropdown:hover .dropdown-content {
+        display: block;
+      }
+      .logo-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--primary), var(--primary2) 45%, var(--primary3));
+        box-shadow: 0 10px 24px rgba(11, 95, 255, 0.25);
+      }
+      .topbar .langbar {
+        margin: 0;
+      }
+      .hero {
+        background:
+          linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+          url("img/banner_bg.webp");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        color: #fff;
+        border-radius: 22px;
+        padding: 40px 30px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
+      .hero > * {
+        position: relative;
+        z-index: 1;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        margin-bottom: 10px;
+      }
+      .langbar {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin: 0 0 14px 0;
+      }
+      .langbtn {
+        appearance: none;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        background: #fff;
+        color: #000;
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 13px;
+      }
+      .langbtn[aria-pressed="true"] {
+        background: #000;
+        color: #fff;
+        border-color: #000;
+      }
+      .langbtn:hover:not([aria-pressed="true"]) {
+        background: #f8f9fa;
+        border-color: #000;
+      }
+      .tagline {
+        margin-top: 10px;
+        padding: 10px 12px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 12px;
+        font-weight: 600;
+      }
+      .hero-meta {
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px solid rgba(255, 255, 255, 0.25);
+      }
+      .hero-location {
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+      .hero-dates {
+        opacity: 0.95;
+        margin-bottom: 14px;
+      }
+      .cta-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        padding: 12px 40px;
+        min-width: 140px;
+        margin-bottom: 16px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.95);
+        color: #0b5fff;
+        font-weight: 800;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        box-shadow: 0 16px 34px rgba(2, 6, 23, 0.20);
+        transition: transform 120ms ease, background 120ms ease;
+      }
+      .cta-btn:hover {
+        transform: translateY(-1px);
+        background: #fff;
+      }
+      .register-text {
+        margin: 10px 0 0 0;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 14px;
+      }
+      .hero .link {
+        color: rgba(255, 255, 255, 0.98);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      code {
+        background: #f3f3f3;
+        padding: 2px 6px;
+        border-radius: 8px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      }
+      .hero h1 {
+        margin: 0 0 10px 0;
+        font-size: 40px;
+        line-height: 1.25;
+      }
+      .hero p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.92);
+        max-width: 62ch;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin-top: 18px;
+      }
+      @media (min-width: 720px) {
+        .grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 24px 22px;
+        box-shadow: 0 10px 26px rgba(2, 6, 23, 0.05);
+        min-height: 120px;
+      }
+      .card h2 {
+        margin: 0 0 10px 0;
+        font-size: 18px;
+      }
+      .card p {
+        margin: 0;
+        color: var(--text);
+        font-size: 14px;
+      }
+      .section {
+        margin-top: 18px;
+      }
+      .section h2 {
+        margin: 0 0 10px 0;
+        font-size: 18px;
+      }
+      .section h3 {
+        margin: 18px 0 8px 0;
+        font-size: 15px;
+      }
+      .section p {
+        margin: 0 0 10px 0;
+        color: var(--text);
+        font-size: 14px;
+      }
+      .section .muted {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .org-list {
+        padding-left: 18px;
+        margin: 0;
+        color: var(--text);
+        font-size: 14px;
+      }
+      .org-list li {
+        margin: 8px 0;
+      }
+      .org-meta {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .org-logos {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 24px;
+        padding: 20px;
+        background: transparent;
+        flex-wrap: wrap;
+      }
+      .org-logo-item {
+        height: 55px;
+        display: flex;
+        align-items: center;
+      }
+      .org-logo-item img {
+        height: 100%;
+        width: auto;
+        object-fit: contain;
+        display: block;
+        transition: all 0.3s ease;
+      }
+      .org-logo-item img:hover {
+        transform: scale(1.05);
+      }
+      .schedule-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        margin-top: 10px;
+      }
+      .schedule-table td {
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      .schedule-table td:first-child {
+        font-weight: 700;
+        width: 160px;
+        color: var(--primary);
+        white-space: nowrap;
+        padding-right: 20px;
+      }
+      .schedule-table tr:last-child td {
+        border-bottom: none;
+      }
+      .link {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .footer {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+      }
+      @media (max-width: 720px) {
+        .topbar-inner {
+          padding: 10px 14px;
+        }
+        .nav-links {
+          display: none;
+        }
+        .page {
+          padding: 18px 14px 50px;
+        }
+        .hero h1 {
+          font-size: 30px;
+        }
+        .hero {
+          padding: 28px 16px;
+        }
+      }
+      .content {
+        display: none;
+      }
+      .content.active {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar" aria-label="Top navigation">
+      <div class="topbar-inner">
+        <a class="brand-link" href="#" aria-label="NLPCC 2026">
+          <img class="topbar-logo" src="img/logo.svg" alt="NLPCC 2026 logo" loading="eager" />
+          <span>NLPCC 2026</span>
+        </a>
+        <!-- <div class="nav-links">
+          <div class="nav-dropdown">
+            <button class="nav-dropbtn">Past Tasks</button>
+            <div class="dropdown-content">
+              <a href="https://github.com/NLP2CT/NLPCC-2025-Task1" target="_blank" rel="noreferrer">NLPCC 2025 Task 1</a>
+            </div>
+          </div>
+        </div> -->
+        <div class="langbar" aria-label="Language switch">
+          <button id="btn-en" class="langbtn" type="button" aria-pressed="true">English</button>
+          <button id="btn-zh" class="langbtn" type="button" aria-pressed="false">中文</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <div id="content-en" class="content active">
+        <section class="hero" aria-label="ShareTask Hero">
+          <div class="brand">NLPCC 2026 Shared Task 10: Reliability of AI-Assisted Scientific Reporting</div>
+          <!-- <p>
+            Given scientific evidence and an AI-generated scientific statement, can a system determine whether the statement faithfully reflects the evidence it summarizes or cites?
+          </p> -->
+          <div class="tagline">
+            Two complementary tracks: claim-level faithfulness to experimental results and citation-level faithfulness to external evidence.
+          </div>
+          <div class="hero-meta" aria-label="Registration and contact">
+            <div class="hero-location">Macau, China</div>
+            <div class="hero-dates">November 3-5, 2026</div>
+            <!-- <div class="hero-location">Organizer: University of Macau</div> -->
+            <div class="hero-dates">Registration has closed. Phase 1 test data and evaluation kit are now available on <a class="link" href="https://github.com/NLP2CT/NLPCC-2026-Task10-Science" target="_blank" rel="noreferrer">GitHub</a>; submissions are open on <a class="link" href="https://www.codabench.org/competitions/16666/" target="_blank" rel="noreferrer">Codabench</a>.</div>
+            <a
+              class="cta-btn"
+              href="https://www.codabench.org/competitions/16666/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Phase 1 Platform
+            </a>
+            <p class="register-text">
+              Submit Phase 1 predictions on Codabench:
+              <a class="link" href="https://www.codabench.org/competitions/16666/" target="_blank" rel="noreferrer">
+                https://www.codabench.org/competitions/16666/
+              </a>
+            </p>
+            <p class="register-text">
+              Alternatively, you may send your team information to:
+              <a class="link" href="mailto:nlp2ct.runzhe@gmail.com">nlp2ct.runzhe@gmail.com</a>
+            </p>
+          </div>
+        </section>
+
+        <section class="section card" aria-label="Latest Notice">
+          <h2>Latest Notice</h2>
+          <p>
+            <strong>[2026/05/26]</strong> Phase 1 is now open. The Phase 1 test inputs, a baseline prompting kit, and the offline evaluation scripts are available in the
+            <a class="link" href="https://github.com/NLP2CT/NLPCC-2026-Task10-Science/tree/main/data" target="_blank" rel="noreferrer">data/</a>,
+            <a class="link" href="https://github.com/NLP2CT/NLPCC-2026-Task10-Science/tree/main/baseline_prompting" target="_blank" rel="noreferrer">baseline_prompting/</a>, and
+            <a class="link" href="https://github.com/NLP2CT/NLPCC-2026-Task10-Science/tree/main/offline_eval" target="_blank" rel="noreferrer">offline_eval/</a> directories of the repository. Submit Phase 1 results on <a class="link" href="https://www.codabench.org/competitions/16666/" target="_blank" rel="noreferrer">Codabench</a>.
+          </p>
+        </section>
+
+        <section class="section card" aria-label="Introduction">
+          <h2>Introduction</h2>
+          <p>
+            As generative AI and agentic AI become increasingly integrated into scientific workflows, they are now widely used to assist with scientific writing, including summarizing experimental results, drafting conclusions, and generating citation-supported
+            statements.
+          </p>
+          <p>
+            Recent studies have shown that AI-assisted scientific reporting often overgeneralizes conclusions beyond what the source evidence justifies. Therefore, this shared task is deliberately scoped to the reporting layer of AI-assisted research and centers on the following question: given scientific evidence and an AI-generated scientific statement, can a system determine whether the statement faithfully reflects the evidence it summarizes or cites?
+          </p>
+        </section>
+
+        <section class="section card" aria-label="Tracks">
+          <h2>Tracks</h2>
+          <h3>Track 1: Claim-level faithfulness to experimental results</h3>
+          <p>
+            Systems are provided with a compact evidence bundle and an AI-generated claim paragraph segmented into individual sentences for evaluation. Participants are required to assign a label to each sentence, indicating whether it is supported by the evidence or, if not, what type of unsupported reporting it contains.
+          </p>
+          <p>
+            In scientific writing, unsupported reporting often appears as one or two problematic sentences embedded within an otherwise plausible paragraph. This track focuses on detecting such fine-grained reporting errors.
+          </p>
+          <h3>Track 2: Citation-level faithfulness to external evidence</h3>
+          <p>
+            Systems are given an atomic AI-generated scientific claim and the full text of the cited paper in structured textual form. They must determine whether the paper directly supports the claim, partially supports it, is only topically related without providing evidential support, or is entirely irrelevant.
+          </p>
+          <p>
+            In addition, participants are required to submit a ranked list of evidence paragraph IDs so that evaluation captures not only labeling accuracy but also the ability to identify the relevant supporting evidence.
+          </p>
+        </section>
+
+        <section class="section card" aria-label="Guidelines and Data">
+          <h2>Task Guidelines & Data</h2>
+          <p>
+            Detailed task guidelines are now available, covering <strong>track definitions</strong>, <strong>data format</strong>, <strong>evaluation metrics</strong>, <strong>submission requirements</strong>, and <strong>FAQ</strong>.
+          </p>
+          <p>
+            <a class="link" href="guidelines.html">Task Guidelines / 任务指南</a>
+          </p>
+          <h3>Data & Toolkits</h3>
+          <p>
+            Train-dev data and Phase 1 test inputs (with images) are available in the <a class="link" href="https://github.com/NLP2CT/NLPCC-2026-Task10-Science/tree/main/data" target="_blank" rel="noreferrer">data/</a> directory. A reference single-turn prompting baseline lives in <a class="link" href="https://github.com/NLP2CT/NLPCC-2026-Task10-Science/tree/main/baseline_prompting" target="_blank" rel="noreferrer">baseline_prompting/</a>, and the official offline evaluator (matching the platform scoring) lives in <a class="link" href="https://github.com/NLP2CT/NLPCC-2026-Task10-Science/tree/main/offline_eval" target="_blank" rel="noreferrer">offline_eval/</a>.
+          </p>
+          <p>
+            <strong>Data usage notice:</strong> During the competition period, all released task data is provided exclusively for NLPCC 2026 Shared Task 10. Credits and attribution belong to the organizers, and the data may not be redistributed, mirrored, republished, relabeled, or released under any other name. After the competition, all training and test data will be redistributed under an open license for scientific research use.
+          </p>
+          <h3>Evaluation</h3>
+          <p>
+            Evaluation is conducted in two phases: <strong>Phase 1 (Open, May 26 – June 20)</strong> with a public leaderboard on <a class="link" href="https://www.codabench.org/competitions/16666/" target="_blank" rel="noreferrer">Codabench</a>, and <strong>Phase 2 (Hidden, June 11 – June 20)</strong> on a held-out test set. The final ranking score is the average of both phases. See the <a class="link" href="guidelines.html">guidelines</a> for full details.
+          </p>
+        </section>
+
+        <section class="section card" aria-label="Schedule">
+          <h2>Schedule</h2>
+          <table class="schedule-table">
+            <tr><td>March 20, 2026</td><td>Shared task announcement and call for participation</td></tr>
+            <tr><td>March 20, 2026</td><td>Registration opens</td></tr>
+            <tr><td>April 15, 2026</td><td>Release of detailed task guidelines and training data</td></tr>
+            <tr><td>May 25, 2026</td><td>Registration deadline</td></tr>
+            <tr><td>May 26, 2026</td><td>Phase 1 data, evaluation entry, and offline evaluation scripts released</td></tr>
+            <tr><td>June 11, 2026</td><td>Hidden (held-out) test data release, no labels <strong>(Phase 2 begins)</strong></td></tr>
+            <tr><td>June 20, 2026</td><td>Deadline for participants to submit all results (Phase 1 + Phase 2)</td></tr>
+            <tr><td>June 30, 2026</td><td>Evaluation results released; call for system reports</td></tr>
+          </table>
+        </section>
+
+        <section class="section card" aria-label="Registration and Contacts">
+          <h2>Registration</h2>
+          <p>
+            Registration has closed. For registration-related questions, please contact
+            <a class="link" href="mailto:nlp2ct.runzhe@gmail.com">nlp2ct.runzhe@gmail.com</a>.
+          </p>
+          <p class="muted">
+            Phase 1 public platform:
+            <a class="link" href="https://www.codabench.org/competitions/16666/" target="_blank" rel="noreferrer">
+              https://www.codabench.org/competitions/16666/
+            </a>
+          </p>
+        </section>
+
+        <section class="section card" aria-label="Organizers">
+          <h2>Organizers</h2>
+          <p>This shared task is organized by the University of Macau.</p>
+          <ul class="org-list">
+            <li><strong>Runzhe Zhan</strong> <span class="org-meta">(Contact)</span> | University of Macau <span class="org-meta">| <a class="link" href="mailto:nlp2ct.runzhe@gmail.com">nlp2ct.runzhe@gmail.com</a> | <a class="link" href="https://runzhe.me/" target="_blank" rel="noreferrer">Homepage</a></span></li>
+            <li><strong>Derek F. Wong</strong> <span class="org-meta">(Advisor)</span> | University of Macau <span class="org-meta">| <a class="link" href="https://www.fst.um.edu.mo/people/derekfw/" target="_blank" rel="noreferrer">Homepage</a></span></li>
+            <li><strong>Yutong Yao</strong> | University of Macau</li>
+            <li><strong>Junchao Wu</strong> | University of Macau <span class="org-meta">| <a class="link" href="https://junchaoiu.github.io/" target="_blank" rel="noreferrer">Homepage</a></span></li>
+            <li><strong>Jingkun Ma</strong> | University of Macau</li>
+            <li><strong>Yanming Sun</strong> | University of Macau</li>
+            <li><strong>Fengying Ye</strong> | University of Macau</li>
+          </ul>
+
+        <div class="org-logos">
+          <a class="org-logo-item" href="http://nlp2ct.cis.um.edu.mo/" target="_blank" rel="noreferrer">
+            <img src="img/nlp2ct_logo.png" alt="NLP2CT Laboratory">
+          </a>
+          <a class="org-logo-item" href="https://www.um.edu.mo/" target="_blank" rel="noreferrer">
+            <img src="img/um_logo.png" alt="University of Macau">
+          </a>
+        </div>
+          
+        </section>
+        <div class="footer">Copyright &copy; 2026 NLP2CT Lab, University of Macau. All Rights Reserved.</div>
+      </div>
+
+      <div id="content-zh" class="content">
+        <section class="hero" aria-label="ShareTask Hero">
+          <div class="brand">NLPCC 2026 共享任务：AI辅助科学报告的可靠性</div>
+          <!-- <p>
+            给定科学证据与一条由 AI 生成的科学陈述，系统能否判断该陈述是否忠实反映了其所概括或引用的证据？
+          </p> -->
+          <div class="tagline">
+            本任务设置两个互补赛道，分别关注实验结果的陈述级忠实性和外部文献的引文级忠实性。
+          </div>
+          <div class="hero-meta" aria-label="会议时间地点与报名">
+            <div class="hero-location">Macau, China</div>
+            <div class="hero-dates">November 3-5, 2026</div>
+            <!-- <div class="hero-location">主办单位：澳门大学</div> -->
+            <div class="hero-dates">报名已截止。第一阶段测试数据和评测套件已在 <a class="link" href="https://github.com/NLP2CT/NLPCC-2026-Task10-Science" target="_blank" rel="noreferrer">GitHub</a> 发布；提交入口已在 <a class="link" href="https://www.codabench.org/competitions/16666/" target="_blank" rel="noreferrer">Codabench</a> 开放。</div>
+            <a
+              class="cta-btn"
+              href="https://www.codabench.org/competitions/16666/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              第一阶段平台
+            </a>
+            <p class="register-text">
+              请在 Codabench 提交第一阶段预测结果：
+              <a class="link" href="https://www.codabench.org/competitions/16666/" target="_blank" rel="noreferrer">
+                https://www.codabench.org/competitions/16666/
+              </a>
+            </p>
+            <p class="register-text">
+              或者，将团队信息发送至报名邮箱：
+              <a class="link" href="mailto:nlp2ct.runzhe@gmail.com">nlp2ct.runzhe@gmail.com</a>
+            </p>
+          </div>
+        </section>
+
+        <section class="section card" aria-label="最新通知">
+          <h2>最新通知</h2>
+          <p>
+            <strong>[2026/05/26]</strong> 第一阶段评测正式开启。第一阶段测试输入、baseline prompting 套件与离线评测脚本已在仓库中发布。请在 <a class="link" href="https://www.codabench.org/competitions/16666/" target="_blank" rel="noreferrer">Codabench</a> 提交第一阶段结果。
+          </p>
+        </section>
+
+        <section class="section card" aria-label="简介">
+          <h2>简介</h2>
+          <p>
+            随着生成式人工智能和智能体人工智能不断融入科学发现和研究流程，相关技术已被广泛用于辅助科学写作，例如总结实验结果、撰写研究结论，以及生成带有引文支持的科学表述。然而，近期研究表明，AI 生成的科学报告常常会对结论作出超出原始证据支持范围的泛化表述。基于此，本共享任务聚焦于 AI 辅助科研中的“报告层”问题，围绕以下核心问题展开：给定科学证据与一条由 AI 生成的科学陈述，系统能否判断该陈述是否忠实反映了其所概括或引用的证据？
+          </p>
+        </section>
+
+        <section class="section card" aria-label="赛道说明">
+          <h2>赛道说明</h2>
+          <h3>Track 1：面向实验结果的陈述级忠实性判定</h3>
+          <p>
+            参赛系统将获得一个紧凑的证据集合，以及一段由 AI 生成的陈述性段落。该段落将被切分为若干独立句子，参赛者需要对每个句子进行标注，判断其是否得到证据支持；若不被支持，则需进一步指出其所属的失实表述类型。
+          </p>
+          <p>
+            在科学写作中，失实表述往往并非表现为整段内容完全错误，而是以一至两个存在问题的句子嵌入在整体看似合理的段落中。因此，本赛道重点考察系统对细粒度报告偏差的识别能力。
+          </p>
+          <h3>Track 2：面向外部证据的引文级忠实性判定</h3>
+          <p>
+            参赛系统将获得一条原子化的 AI 生成科学陈述，以及被引用论文的结构化全文文本。系统需要判断该论文与陈述之间的关系属于以下哪一类：直接支持、部分支持、仅主题相关但不构成证据支持、完全无关。
+          </p>
+          <p>
+            此外，参赛系统还需提交一个按相关性排序的证据段落编号列表。这样，评测不仅关注标签判定的准确性，也关注系统定位关键支持证据的能力。
+          </p>
+        </section>
+
+        <section class="section card" aria-label="任务指南与数据">
+          <h2>任务指南与数据</h2>
+          <p>
+            详细任务指南现已发布，涵盖<strong>赛道定义</strong>、<strong>数据格式</strong>、<strong>评测指标</strong>、<strong>提交要求</strong>及<strong>常见问题</strong>。
+          </p>
+          <p>
+            <a class="link" href="guidelines.html">任务指南（中文版）</a> &nbsp;|&nbsp;
+            <a class="link" href="guidelines.html">Task Guidelines (English)</a>
+          </p>
+          <h3>数据与工具包</h3>
+          <p>
+            训练开发数据、第一阶段测试输入、baseline prompting 套件与离线评测脚本已发布在 <a class="link" href="https://github.com/NLP2CT/NLPCC-2026-Task10-Science" target="_blank" rel="noreferrer">GitHub</a> 上。第一阶段公开排行榜与提交入口位于 <a class="link" href="https://www.codabench.org/competitions/16666/" target="_blank" rel="noreferrer">Codabench</a>。
+          </p>
+          <p>
+            <strong>数据使用说明：</strong>比赛期间，所有已发布的任务数据仅限用于参加 NLPCC 2026 Shared Task 10，相关署名权及发布权均归组织方所有；未经许可，不得以其他名义对数据进行二次分发、镜像发布、重新发布、重新命名或另行发布。比赛结束后，所有训练和测试数据将以开放协议重新分发，并可用于科研用途。
+          </p>
+          <h3>评测方案</h3>
+          <p>
+            评测分两个阶段进行：<strong>第一阶段（公开评测，5 月 26 日 – 6 月 20 日）</strong>设公开排行榜，<strong>第二阶段（隐藏评测，6 月 11 日 – 6 月 20 日）</strong>使用隐藏测试集。最终排名分数为两阶段得分的平均值。详见<a class="link" href="guidelines.html">任务指南</a>。
+          </p>
+        </section>
+
+        <section class="section card" aria-label="日程安排">
+          <h2>日程安排</h2>
+          <table class="schedule-table">
+            <tr><td>2026年3月20日</td><td>共享任务发布及参赛征集</td></tr>
+            <tr><td>2026年3月20日</td><td>报名开始</td></tr>
+            <tr><td>2026年4月15日</td><td>发布详细任务指南与训练数据</td></tr>
+            <tr><td>2026年5月25日</td><td>报名截止</td></tr>
+            <tr><td>2026年5月26日</td><td>发布第一阶段数据、评测入口和离线评测脚本</td></tr>
+            <tr><td>2026年6月11日</td><td>发布隐藏测试数据（不含标签）<strong>（第二阶段开始）</strong></td></tr>
+            <tr><td>2026年6月20日</td><td>参赛队伍提交所有结果的截止日（第一阶段 + 第二阶段）</td></tr>
+            <tr><td>2026年6月30日</td><td>公布评测结果；征集系统报告</td></tr>
+          </table>
+        </section>
+
+        <section class="section card" aria-label="报名方式">
+          <h2>报名方式</h2>
+          <p>
+            报名已截止。如有报名相关问题，请联系
+            <a class="link" href="mailto:nlp2ct.runzhe@gmail.com">nlp2ct.runzhe@gmail.com</a>。
+          </p>
+        </section>
+
+        <section class="section card" aria-label="组织者">
+          <h2>组织者</h2>
+          <p>本共享任务由澳门大学主办。</p>
+          <ul class="org-list">
+            <li><strong>詹润哲</strong> <span class="org-meta">（Contact）</span> | 澳门大学 <span class="org-meta">| <a class="link" href="mailto:nlp2ct.runzhe@gmail.com">nlp2ct.runzhe@gmail.com</a> | <a class="link" href="https://runzhe.me/" target="_blank" rel="noreferrer">Homepage</a></span></li>
+            <li><strong>黄辉</strong> <span class="org-meta">（Advisor）</span> | 澳门大学 <span class="org-meta">| <a class="link" href="https://www.fst.um.edu.mo/people/derekfw/" target="_blank" rel="noreferrer">Homepage</a></span></li>
+            <li><strong>姚宇同</strong> | 澳门大学</li>
+            <li><strong>吴俊潮</strong> | 澳门大学 <span class="org-meta">| <a class="link" href="https://junchaoiu.github.io/" target="_blank" rel="noreferrer">Homepage</a></span></li>
+            <li><strong>马景坤</strong> | 澳门大学</li>
+            <li><strong>孙燕明</strong> | 澳门大学</li>
+            <li><strong>叶沣颖</strong> | 澳门大学</li>
+          </ul>
+          
+        <div class="org-logos">
+          <a class="org-logo-item" href="http://nlp2ct.cis.um.edu.mo/" target="_blank" rel="noreferrer">
+            <img src="img/nlp2ct_logo.png" alt="NLP2CT Laboratory">
+          </a>
+          <a class="org-logo-item" href="https://www.um.edu.mo/" target="_blank" rel="noreferrer">
+            <img src="img/um_logo.png" alt="University of Macau">
+          </a>
+        </div>
+          
+        </section>
+
+        <div class="footer">Copyright &copy; 2026 NLP2CT Lab, University of Macau. All Rights Reserved.</div>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        const en = document.getElementById("content-en");
+        const zh = document.getElementById("content-zh");
+        const btnEn = document.getElementById("btn-en");
+        const btnZh = document.getElementById("btn-zh");
+        const pastTasksBtn = document.querySelector(".nav-dropbtn");
+
+        function setLang(lang) {
+          const isEn = lang === "en";
+          en.classList.toggle("active", isEn);
+          zh.classList.toggle("active", !isEn);
+          btnEn.setAttribute("aria-pressed", String(isEn));
+          btnZh.setAttribute("aria-pressed", String(!isEn));
+          document.documentElement.lang = isEn ? "en" : "zh-CN";
+
+          if (pastTasksBtn) {
+            pastTasksBtn.textContent = isEn ? "Past Tasks" : "往届任务";
+          }
+
+          try {
+            localStorage.setItem("lang", lang);
+          } catch (e) {
+            // Ignore if storage is not available.
+          }
+        }
+
+        let initial = "en";
+        try {
+          const saved = localStorage.getItem("lang");
+          if (saved === "en" || saved === "zh") initial = saved;
+        } catch (e) {}
+        setLang(initial);
+
+        btnEn.addEventListener("click", function () {
+          setLang("en");
+        });
+        btnZh.addEventListener("click", function () {
+          setLang("zh");
+        });
+      })();
+    </script>
+  </body>
+</html>

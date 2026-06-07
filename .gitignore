@@ -1,0 +1,24 @@
+# --- Python ---
+.DS_Store
+__pycache__/
+*.pyc
+
+# --- Competition data: do NOT redistribute (task license) ---
+data/
+
+# --- Training artifacts: too large for git (7.8G) ---
+checkpoint/
+checkpoint_track1/
+baseline_prompting/checkpoint/
+baseline_prompting/my_bert_model/
+my_bert_model/
+logs/
+*.bin
+*.safetensors
+
+# --- Run outputs / predictions ---
+outputs/
+result/
+
+# --- Secrets ---
+.env

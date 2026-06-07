@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Task Guidelines — NLPCC 2026 Shared Task 10</title>
+    <style>
+      :root {
+        --primary: #0b5fff;
+        --primary2: #6a5cff;
+        --primary3: #7c3aed;
+        --text: #0f172a;
+        --muted: #475569;
+        --border: rgba(15, 23, 42, 0.12);
+        --shadow: 0 14px 40px rgba(2, 6, 23, 0.08);
+        --card: #ffffff;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "PingFang SC",
+          "Microsoft YaHei", sans-serif;
+        line-height: 1.7;
+        color: var(--text);
+        background:
+          radial-gradient(900px 420px at 12% 0%, rgba(11, 95, 255, 0.12), transparent 55%),
+          radial-gradient(800px 520px at 82% 18%, rgba(124, 58, 237, 0.10), transparent 50%),
+          #f6f8ff;
+      }
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: rgba(46, 109, 155, 0.8);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+      }
+      .topbar-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .brand-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+        text-decoration: none;
+        color: #ffffff;
+        letter-spacing: 0.2px;
+      }
+      .topbar-logo {
+        height: 34px;
+        width: auto;
+        display: block;
+      }
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .back-link {
+        color: rgba(255,255,255,0.9);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .back-link:hover { color: #fff; }
+      .langbar {
+        display: flex;
+        gap: 10px;
+        margin: 0;
+      }
+      .langbtn {
+        appearance: none;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        background: #fff;
+        color: #000;
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 13px;
+      }
+      .langbtn[aria-pressed="true"] {
+        background: #000;
+        color: #fff;
+        border-color: #000;
+      }
+      .langbtn:hover:not([aria-pressed="true"]) {
+        background: #f8f9fa;
+        border-color: #000;
+      }
+      .page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px 20px 60px;
+      }
+      .content { display: none; }
+      .content.active { display: block; }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 32px 30px;
+        box-shadow: 0 10px 26px rgba(2, 6, 23, 0.05);
+        margin-bottom: 18px;
+      }
+      h1 { font-size: 26px; margin: 0 0 4px 0; }
+      .subtitle { color: var(--muted); font-size: 14px; margin: 0 0 20px 0; }
+      h2 { font-size: 20px; margin: 28px 0 14px 0; border-bottom: 2px solid var(--border); padding-bottom: 6px; }
+      h2:first-child { margin-top: 0; }
+      h3 { font-size: 16px; margin: 22px 0 10px 0; }
+      h4 { font-size: 14px; margin: 18px 0 8px 0; }
+      p { margin: 0 0 12px 0; font-size: 14.5px; }
+      ul, ol { margin: 0 0 12px 0; padding-left: 22px; font-size: 14.5px; }
+      li { margin: 4px 0; }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13.5px;
+        margin: 10px 0 16px 0;
+      }
+      th, td {
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #f1f5f9;
+        font-weight: 700;
+      }
+      code {
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 13px;
+      }
+      pre {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 16px 20px;
+        border-radius: 10px;
+        overflow-x: auto;
+        font-size: 13px;
+        line-height: 1.5;
+        margin: 10px 0 16px 0;
+      }
+      pre code {
+        background: none;
+        padding: 0;
+        color: inherit;
+      }
+      .note {
+        background: #f0f7ff;
+        border-left: 4px solid var(--primary);
+        padding: 12px 16px;
+        border-radius: 0 8px 8px 0;
+        margin: 10px 0 16px 0;
+        font-size: 14px;
+      }
+      .faq-q { font-weight: 700; margin: 16px 0 4px 0; font-size: 14.5px; }
+      .faq-a { margin: 0 0 12px 0; font-size: 14.5px; padding-left: 8px; }
+      .link { color: var(--primary); text-decoration: none; font-weight: 600; }
+      .link:hover { text-decoration: underline; }
+      .formula { font-weight: 700; margin: 8px 0 12px 0; font-size: 14.5px; }
+      .footer {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+      }
+      @media (max-width: 720px) {
+        .topbar-inner { padding: 10px 14px; }
+        .page { padding: 18px 14px 50px; }
+        .card { padding: 20px 16px; }
+        h1 { font-size: 22px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand-link" href="index.html">
+          <img class="topbar-logo" src="img/logo.svg" alt="NLPCC 2026 logo" loading="eager" />
+          <span>NLPCC 2026</span>
+        </a>
+        <div class="topbar-right">
+          <a class="back-link" href="index.html" id="back-link">&larr; Back to Home</a>
+          <div class="langbar">
+            <button id="btn-en" class="langbtn" type="button" aria-pressed="true">English</button>
+            <button id="btn-zh" class="langbtn" type="button" aria-pressed="false">中文</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <!-- ==================== ENGLISH ==================== -->
+      <div id="content-en" class="content active">
+        <div class="card">
+          <h1>Task Guidelines</h1>
+          <p class="subtitle">NLPCC 2026 Shared Task 10: The Reliability of AI-Assisted Scientific Reporting</p>
+
+          <h2>1. Track Definitions</h2>
+
+          <h3>Track 1: Claim-Level Faithfulness to Experimental Results</h3>
+          <p>Each example contains:</p>
+          <ul>
+            <li><strong>Evidence bundle</strong>: a result paragraph, optionally with tables/charts, extracted from an open-access NLP paper.</li>
+            <li><strong>Claim paragraph</strong>: typically 2-4 sentences, generated to summarize or interpret the evidence bundle.</li>
+          </ul>
+          <p>For each sentence in the paragraph, systems must output <strong>one label</strong> from the following set:</p>
+          <table>
+            <tr><th>Label</th><th>Description</th></tr>
+            <tr><td><code>Supported</code></td><td>The sentence is adequately supported by the evidence bundle.</td></tr>
+            <tr><td><code>Unsupported Causal Mechanistic</code></td><td>The sentence introduces unsupported causal or mechanistic interpretation.</td></tr>
+            <tr><td><code>Unsupported Entity</code></td><td>The sentence mentions unsupported datasets, metrics, model variants, baselines, or related scientific entities.</td></tr>
+            <tr><td><code>Scope Overgeneralization</code></td><td>The sentence extends the supported scope beyond what the evidence warrants.</td></tr>
+            <tr><td><code>Contradiction</code></td><td>The sentence directly conflicts with the evidence.</td></tr>
+          </table>
+          <p>Each sentence is assigned a single primary label. In rare cases, a sentence may be annotated with multiple applicable labels; predicting any one of them is considered correct for evaluation purposes.</p>
+
+          <h4>Track 1 Train-Dev Data Format</h4>
+          <p>Each record in the released JSONL file contains the following fields:</p>
+<pre><code>{
+  "claim_text": "string — the claim paragraph",
+  "evidence_bundle": [
+    { "type": "text", "text": "result paragraph text ..." },
+    { "type": "table", "table_caption": ["Table 3: ..."], "img_path": "images/xxx.jpg" },
+    { "type": "image", "image_caption": ["Figure 1: ..."], "img_path": "images/xxx.jpg" }
+  ],
+  "sentence_label": [
+    { "sentence": "sentence text ...", "types": ["Supported"] },
+    { "sentence": "sentence text ...", "types": ["Unsupported Entity"] }
+  ]
+}</code></pre>
+          <table>
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td><code>claim_text</code></td><td>string</td><td>The full claim paragraph.</td></tr>
+            <tr><td><code>evidence_bundle</code></td><td>list of objects</td><td>One or more evidence items. Each item has a <code>type</code> field (<code>"text"</code>, <code>"table"</code>, or <code>"image"</code>) and type-specific content fields.</td></tr>
+            <tr><td><code>sentence_label</code></td><td>list of objects</td><td>Per-sentence annotations. Each object contains a <code>sentence</code> (string) and <code>types</code> (list of labels; typically one, see note above).</td></tr>
+          </table>
+          <div class="note">At test time, the <code>types</code> field in <code>sentence_label</code> will be withheld. Participants will receive <code>claim_text</code>, <code>evidence_bundle</code>, and the sentence segmentation.</div>
+          <p>The image files referenced by <code>img_path</code> in the evidence bundle are provided separately in <code>images.zip</code> (train-dev) and <code>images-testp1.zip</code> (Phase 1 test). Inside the archives, files are stored at the archive root (e.g. <code>&lt;sha&gt;.jpg</code>). To match the relative <code>images/&lt;sha&gt;.jpg</code> paths used in the JSONL records, extract each archive into a directory named <code>images/</code> (for example <code>unzip data/images.zip -d data/images/</code>).</p>
+
+          <h4>Track 1 Train-Dev Data Statistics</h4>
+          <table>
+            <tr><th></th><th>Count</th></tr>
+            <tr><td>Records</td><td>3,333</td></tr>
+            <tr><td>Total sentences</td><td>17,547</td></tr>
+          </table>
+          <p><strong>Negative label distribution (counts are not mutually exclusive):</strong></p>
+          <table>
+            <tr><th>Label</th><th>Count</th></tr>
+            <tr><td><code>Unsupported Entity</code></td><td>639</td></tr>
+            <tr><td><code>Scope Overgeneralization</code></td><td>605</td></tr>
+            <tr><td><code>Unsupported Causal Mechanistic</code></td><td>276</td></tr>
+            <tr><td><code>Contradiction</code></td><td>216</td></tr>
+          </table>
+
+          <h3>Track 2: Citation-Level Faithfulness to External Evidence</h3>
+          <p>Each example contains:</p>
+          <ul>
+            <li><strong>Atomic claim</strong>: a single scientific claim associated with one cited paper.</li>
+            <li><strong>Cited paper (full text)</strong>: the cited paper in structured textual form, represented as a list of paragraphs with stable paragraph IDs (e.g., <code>P1</code>, <code>P2</code>, ...).</li>
+          </ul>
+          <p>Systems must output:</p>
+          <ol>
+            <li><strong>One support label</strong> from the following set:</li>
+          </ol>
+          <table>
+            <tr><th>Label</th><th>Description</th></tr>
+            <tr><td><code>Supported</code></td><td>The cited paper provides evidence directly supporting the claim.</td></tr>
+            <tr><td><code>Overstate</code></td><td>The claim overstates what the cited paper supports.</td></tr>
+            <tr><td><code>Topical Match</code></td><td>The cited paper is topically related but does not provide the evidential support required for the claim.</td></tr>
+            <tr><td><code>Irrelevant</code></td><td>The cited paper has no meaningful support relation to the claim.</td></tr>
+          </table>
+          <ol start="2">
+            <li><strong>A ranked list of up to <em>k</em> = 3 evidence paragraph IDs</strong>, identifying the paragraphs in the cited paper that are most relevant to the support judgment.</li>
+          </ol>
+
+          <h4>Track 2 Train-Dev Data Format</h4>
+<pre><code>{
+  "claim_text": "string — the scientific claim",
+  "cited_paper_full_text": [
+    {"P1": "paragraph text ..."},
+    {"P2": "paragraph text ..."},
+    ...
+  ],
+  "evidence_para_ids": ["P12", "P13"],
+  "evidence_texts": { "P12": "paragraph text ...", "P13": "paragraph text ..." },
+  "label": "Supported | Overstate | Topical Match | Irrelevant"
+}</code></pre>
+          <table>
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td><code>claim_text</code></td><td>string</td><td>The atomic scientific claim to be verified.</td></tr>
+            <tr><td><code>cited_paper_full_text</code></td><td>list of objects</td><td>The full cited paper, represented as a list of <code>{paragraph_id: text}</code> objects in document order.</td></tr>
+            <tr><td><code>evidence_para_ids</code></td><td>list of strings</td><td>Gold paragraph IDs that serve as evidence for the support judgment.</td></tr>
+            <tr><td><code>evidence_texts</code></td><td>object</td><td>A convenience mapping from each gold evidence paragraph ID to its text content.</td></tr>
+            <tr><td><code>label</code></td><td>string</td><td>The gold support label (one of: <code>Supported</code>, <code>Overstate</code>, <code>Topical Match</code>, <code>Irrelevant</code>).</td></tr>
+          </table>
+          <div class="note">At test time, the <code>label</code>, <code>evidence_para_ids</code>, and <code>evidence_texts</code> fields will be withheld. Participants will receive only <code>claim_text</code> and <code>cited_paper_full_text</code>.</div>
+
+          <h4>Track 2 Train-Dev Data Statistics</h4>
+          <table>
+            <tr><th>Label</th><th>Count</th></tr>
+            <tr><td><code>Supported</code></td><td>1,029</td></tr>
+            <tr><td><code>Irrelevant</code></td><td>382</td></tr>
+            <tr><td><code>Topical Match</code></td><td>376</td></tr>
+            <tr><td><code>Overstate</code></td><td>375</td></tr>
+            <tr><td><strong>Total</strong></td><td><strong>2,162</strong></td></tr>
+          </table>
+
+          <h2>2. Evaluation</h2>
+
+          <h3>Metrics</h3>
+          <p><strong>Track 1</strong> uses two official metrics:</p>
+          <ol>
+            <li><strong>Sentence-level Macro-F1</strong> over all labels — balanced performance across all categories.</li>
+            <li><strong>Paragraph Exact Match (PEM)</strong> — a paragraph is correct only if <em>all</em> sentence labels are predicted correctly.</li>
+          </ol>
+          <p class="formula">Track 1 ranking score = (Macro-F1 + PEM) / 2</p>
+
+          <p><strong>Track 2</strong> uses two official metrics:</p>
+          <ol>
+            <li><strong>Label Macro-F1</strong> over the four support labels — balanced performance on support-relation classification.</li>
+            <li><strong>Joint@3</strong> — a prediction is counted as successful only if the system assigns the <strong>correct support label</strong> <em>and</em> retrieves <strong>at least one correct evidence paragraph</strong> in its top-3 evidence predictions.</li>
+          </ol>
+          <p class="formula">Track 2 ranking score = (Macro-F1 + Joint@3) / 2</p>
+          <p>For Track 2, when the gold evidence list of a sample is empty, Joint@3 is counted as successful only if the predicted label is correct <em>and</em> the predicted evidence list is also empty (the <code>match-empty</code> policy of the offline evaluator). This is the policy used for the official ranking on both the public leaderboard (Phase 1) and the hidden test set (Phase 2).</p>
+
+          <h3>Two-Phase Evaluation</h3>
+          <p>Evaluation is conducted in two phases to balance development flexibility with robustness against overfitting.</p>
+          <p><strong>Phase 1 — Open Evaluation (May 26 – June 20, 2026):</strong><br>
+          The Phase 1 test data, baseline prompting kit, and offline evaluation scripts have been released on May 26 (see the <a class="link" href="https://github.com/NLP2CT/NLPCC-2026-Task10-Science/tree/main/data" target="_blank" rel="noreferrer">data/</a>, <a class="link" href="https://github.com/NLP2CT/NLPCC-2026-Task10-Science/tree/main/baseline_prompting" target="_blank" rel="noreferrer">baseline_prompting/</a>, and <a class="link" href="https://github.com/NLP2CT/NLPCC-2026-Task10-Science/tree/main/offline_eval" target="_blank" rel="noreferrer">offline_eval/</a> directories in the repository). Participants must submit result files to the <a class="link" href="https://www.codabench.org/competitions/16666/" target="_blank" rel="noreferrer">Phase 1 Codabench platform</a> in the official format to obtain their Phase 1 scores. The public leaderboard will remain open until the final submission deadline.</p>
+          <p><strong>Phase 2 — Hidden Evaluation (June 11 – June 20, 2026):</strong><br>
+          On June 11, the organizers will release a previously unseen held-out test set (without labels). Participants must run their final models on this hidden test set and submit result files to the platform before the submission deadline (June 20).</p>
+          <p><strong>Final Score:</strong><br>
+          The final ranking score is the average of the Phase 1 (open) and Phase 2 (hidden) scores. This two-phase design discourages overfitting to the open test data and better reflects system generalizability.</p>
+
+          <h3>Data Release and Usage Policy</h3>
+          <p>All data released for this shared task, including train/dev data, open test data, and hidden test data, is provided exclusively for participation in NLPCC 2026 Shared Task 10 during the competition period.</p>
+          <p>During the competition period, all credits and attribution for the released data belong to the organizers. Participants and third parties may not redistribute, mirror, republish, relabel, or create alternative releases of the data under any other name.</p>
+          <p>After the competition concludes, all task data, including both training and test data, will be redistributed under an open license and may be used for scientific research purposes.</p>
+
+          <h2>3. Submission Requirements</h2>
+          <p>Each participating team must submit:</p>
+          <ol>
+            <li><strong>Result files</strong> in the official submission format, submitted to the platform for both Phase 1 (open) and Phase 2 (hidden) test inputs. The Phase 1 public platform is <a class="link" href="https://www.codabench.org/competitions/16666/" target="_blank" rel="noreferrer">Codabench competition 16666</a>.</li>
+            <li><strong>A technical report</strong> that comprehensively describes:
+              <ul>
+                <li>Training data sources and any data augmentation or preprocessing steps</li>
+                <li>Model architecture and design choices</li>
+                <li>Prompting strategy or retrieval setup (if applicable)</li>
+                <li>Training procedure and hyperparameters</li>
+                <li>Evaluation methodology and any ablation results</li>
+              </ul>
+              The technical report must provide sufficient detail for full reproducibility. The organizers reserve the right to request <strong>verification materials</strong> — including source code, model weights, and training scripts — for any submission where reproducibility concerns arise.
+            </li>
+          </ol>
+
+          <h2>4. Schedule</h2>
+          <table>
+            <tr><th>Date</th><th>Event</th></tr>
+            <tr><td>March 20, 2026</td><td>Shared task announcement and call for participation</td></tr>
+            <tr><td>March 20, 2026</td><td>Registration opens</td></tr>
+            <tr><td>April 15, 2026</td><td>Release of detailed task guidelines and training data</td></tr>
+            <tr><td>May 25, 2026</td><td>Registration deadline</td></tr>
+            <tr><td>May 26, 2026</td><td>Phase 1 data, evaluation entry, and offline evaluation scripts released</td></tr>
+            <tr><td>June 11, 2026</td><td>Hidden (held-out) test data release, no labels <strong>(Phase 2 begins)</strong></td></tr>
+            <tr><td>June 20, 2026</td><td>Deadline for participants to submit all results (Phase 1 + Phase 2)</td></tr>
+            <tr><td>June 30, 2026</td><td>Evaluation results released; call for system reports</td></tr>
+          </table>
+
+          <h2>5. FAQ</h2>
+
+          <p class="faq-q">Q: Do teams have to participate in both tracks?</p>
+          <p class="faq-a">A: No. Teams may participate in either track or both. Tracks are evaluated independently.</p>
+
+          <p class="faq-q">Q: How are awards determined?</p>
+          <p class="faq-a">A: We follow the NLPCC <a class="link" href="http://tcci.ccf.org.cn/conference/2026/shared-tasks/" target="_blank" rel="noreferrer">official guidelines</a>. The top-ranked team in each track will receive a certificate jointly issued by NLPCC and CCF-NLP. We are also considering an award for the top-ranked team based on the average score across both tracks (to be confirmed).</p>
+
+          <p class="faq-q">Q: Does each Track 1 sample contain only one piece of evidence?</p>
+          <p class="faq-a">A: No. An evidence bundle may contain multiple materials — for example, a result paragraph together with one or more paragraphs, tables or charts. Systems should consider all provided evidence when making predictions.</p>
+
+          <p class="faq-q">Q: Track 1 may include multimodal inputs (e.g., tables or charts). Are participants required to use end-to-end multimodal models?</p>
+          <p class="faq-a">A: No. There are no restrictions on system design. Participants may use any approach they see fit.</p>
+
+          <p class="faq-q">Q: In Track 2, what if a claim references multiple citations?</p>
+          <p class="faq-a">A: Each Track 2 data sample is paired with cited papers. Participants only need to consider the full-text material provided for that sample; the task will not require resolving references beyond the given cited paper.</p>
+
+          <p class="faq-q">Q: Can we submit multiple times to the online platform during Phase 1 (open evaluation)?</p>
+          <p class="faq-a">A: Yes. Participants may submit multiple times during the open evaluation period. The leaderboard will reflect the latest submission.</p>
+
+          <p class="faq-q">Q: Can we use external datasets or additional papers beyond the released train/dev data for training?</p>
+          <p class="faq-a">A: Yes. Training data sources are unrestricted. All external data sources used must be disclosed in the technical report. We will categorize and summarize the different approaches in the final task overview paper, but the choice of training data will not affect scoring &amp; ranking.</p>
+
+          <p class="faq-q">Q: Can we use proprietary LLMs (e.g., GPT-5, Claude) via API in our systems?</p>
+          <p class="faq-a">A: Yes. However, participants must clearly report the model name, version (w/ request date), and API costs in the technical report.</p>
+        </div>
+        <div class="footer">Copyright &copy; 2026 NLP2CT Lab, University of Macau. All Rights Reserved.</div>
+      </div>
+
+      <!-- ==================== CHINESE ==================== -->
+      <div id="content-zh" class="content">
+        <div class="card">
+          <h1>任务指南</h1>
+          <p class="subtitle">NLPCC 2026 共享任务 10：AI 辅助科学报告的可靠性</p>
+
+          <h2>1. 赛道定义</h2>
+
+          <h3>Track 1：面向实验结果的陈述级忠实性判定</h3>
+          <p>每个样本包含：</p>
+          <ul>
+            <li><strong>证据材料（Evidence bundle）</strong>：从开放获取的 NLP 论文中提取的结果段落，可能附带表格或图表。</li>
+            <li><strong>陈述段落（Claim paragraph）</strong>：通常包含 2-4 个句子，用于总结或解释证据材料。</li>
+          </ul>
+          <p>系统需要为段落中的每个句子输出<strong>一个标签</strong>，标签集如下：</p>
+          <table>
+            <tr><th>标签</th><th>描述</th></tr>
+            <tr><td><code>Supported</code></td><td>该句子被证据材料充分支持。</td></tr>
+            <tr><td><code>Unsupported Causal Mechanistic</code></td><td>该句子引入了证据不支持的因果或机制性解释。</td></tr>
+            <tr><td><code>Unsupported Entity</code></td><td>该句子提及了证据不支持的数据集、指标、模型变体、基线或相关科学实体。</td></tr>
+            <tr><td><code>Scope Overgeneralization</code></td><td>该句子将结论推广到超出证据所支持的范围。</td></tr>
+            <tr><td><code>Contradiction</code></td><td>该句子与证据直接矛盾。</td></tr>
+          </table>
+          <p>每个句子标注一个主要标签。在极少数情况下，一个句子可能被标注了多个适用标签；评测时预测命中其中任一标签即视为正确。</p>
+
+          <h4>Track 1 训练开发数据格式</h4>
+          <p>发布的 JSONL 文件中，每条记录包含以下字段：</p>
+<pre><code>{
+  "claim_text": "string — 陈述段落",
+  "evidence_bundle": [
+    { "type": "text", "text": "结果段落文本 ..." },
+    { "type": "table", "table_caption": ["Table 3: ..."], "img_path": "images/xxx.jpg" },
+    { "type": "image", "image_caption": ["Figure 1: ..."], "img_path": "images/xxx.jpg" }
+  ],
+  "sentence_label": [
+    { "sentence": "句子文本 ...", "types": ["Supported"] },
+    { "sentence": "句子文本 ...", "types": ["Unsupported Entity"] }
+  ]
+}</code></pre>
+          <table>
+            <tr><th>字段</th><th>类型</th><th>描述</th></tr>
+            <tr><td><code>claim_text</code></td><td>string</td><td>完整陈述段落。</td></tr>
+            <tr><td><code>evidence_bundle</code></td><td>list of objects</td><td>一个或多个证据项。每个证据项包含 <code>type</code> 字段（<code>"text"</code>、<code>"table"</code> 或 <code>"image"</code>）及对应的内容字段。</td></tr>
+            <tr><td><code>sentence_label</code></td><td>list of objects</td><td>逐句标注。每个对象包含 <code>sentence</code>（字符串）和 <code>types</code>（标签列表；通常为一个，详见上述说明）。</td></tr>
+          </table>
+          <div class="note">测试阶段，<code>sentence_label</code> 中的 <code>types</code> 字段将被隐去。参赛者将收到 <code>claim_text</code>、<code>evidence_bundle</code> 以及句子切分结果。</div>
+          <p>证据材料中 <code>img_path</code> 所引用的图像文件单独提供在 <code>images.zip</code>（train-dev）和 <code>images-testp1.zip</code>（Phase 1 测试集）中。压缩包内的文件位于压缩包根目录（例如 <code>&lt;sha&gt;.jpg</code>），为与 JSONL 中 <code>images/&lt;sha&gt;.jpg</code> 这样的相对路径对齐，请将压缩包解压到名为 <code>images/</code> 的目录中（例如 <code>unzip data/images.zip -d data/images/</code>）。</p>
+
+          <h4>Track 1 训练开发数据统计</h4>
+          <table>
+            <tr><th></th><th>数量</th></tr>
+            <tr><td>记录数</td><td>3,333</td></tr>
+            <tr><td>总句子数</td><td>17,547</td></tr>
+          </table>
+          <p><strong>负向标签分布（计数不互斥）：</strong></p>
+          <table>
+            <tr><th>标签</th><th>数量</th></tr>
+            <tr><td><code>Unsupported Entity</code></td><td>639</td></tr>
+            <tr><td><code>Scope Overgeneralization</code></td><td>605</td></tr>
+            <tr><td><code>Unsupported Causal Mechanistic</code></td><td>276</td></tr>
+            <tr><td><code>Contradiction</code></td><td>216</td></tr>
+          </table>
+
+          <h3>Track 2：面向外部证据的引文级忠实性判定</h3>
+          <p>每个样本包含：</p>
+          <ul>
+            <li><strong>原子级陈述（Atomic claim）</strong>：与一篇被引论文关联的单条科学陈述。</li>
+            <li><strong>被引论文全文（Cited paper full text）</strong>：以结构化文本形式呈现，表示为带有稳定段落 ID（如 <code>P1</code>、<code>P2</code>、...）的段落列表。</li>
+          </ul>
+          <p>系统需要输出：</p>
+          <ol>
+            <li>以下标签集中的<strong>一个支持关系标签</strong>：</li>
+          </ol>
+          <table>
+            <tr><th>标签</th><th>描述</th></tr>
+            <tr><td><code>Supported</code></td><td>被引论文提供了直接支持该陈述的证据。</td></tr>
+            <tr><td><code>Overstate</code></td><td>该陈述夸大了被引论文所支持的内容。</td></tr>
+            <tr><td><code>Topical Match</code></td><td>被引论文与陈述主题相关，但未提供陈述所需的证据支持。</td></tr>
+            <tr><td><code>Irrelevant</code></td><td>被引论文与该陈述无实质性支持关系。</td></tr>
+          </table>
+          <ol start="2">
+            <li><strong>一个至多包含 <em>k</em> = 3 个证据段落 ID 的排序列表</strong>，标识被引论文中与支持判断最相关的段落。</li>
+          </ol>
+
+          <h4>Track 2 训练开发数据格式</h4>
+<pre><code>{
+  "claim_text": "string — 科学陈述",
+  "cited_paper_full_text": [
+    {"P1": "段落文本 ..."},
+    {"P2": "段落文本 ..."},
+    ...
+  ],
+  "evidence_para_ids": ["P12", "P13"],
+  "evidence_texts": { "P12": "段落文本 ...", "P13": "段落文本 ..." },
+  "label": "Supported | Overstate | Topical Match | Irrelevant"
+}</code></pre>
+          <table>
+            <tr><th>字段</th><th>类型</th><th>描述</th></tr>
+            <tr><td><code>claim_text</code></td><td>string</td><td>待验证的原子级科学陈述。</td></tr>
+            <tr><td><code>cited_paper_full_text</code></td><td>list of objects</td><td>被引论文全文，以 <code>{paragraph_id: text}</code> 对象列表形式按文档顺序排列。</td></tr>
+            <tr><td><code>evidence_para_ids</code></td><td>list of strings</td><td>作为支持判断依据的标准答案段落 ID。</td></tr>
+            <tr><td><code>evidence_texts</code></td><td>object</td><td>便捷映射，从标准答案证据段落 ID 到其文本内容。</td></tr>
+            <tr><td><code>label</code></td><td>string</td><td>标准答案标签（<code>Supported</code>、<code>Overstate</code>、<code>Topical Match</code>、<code>Irrelevant</code> 之一）。</td></tr>
+          </table>
+          <div class="note">测试阶段，<code>label</code>、<code>evidence_para_ids</code> 和 <code>evidence_texts</code> 字段将被隐去。参赛者仅收到 <code>claim_text</code> 和 <code>cited_paper_full_text</code>。</div>
+
+          <h4>Track 2 训练开发数据统计</h4>
+          <table>
+            <tr><th>标签</th><th>数量</th></tr>
+            <tr><td><code>Supported</code></td><td>1,029</td></tr>
+            <tr><td><code>Irrelevant</code></td><td>382</td></tr>
+            <tr><td><code>Topical Match</code></td><td>376</td></tr>
+            <tr><td><code>Overstate</code></td><td>375</td></tr>
+            <tr><td><strong>合计</strong></td><td><strong>2,162</strong></td></tr>
+          </table>
+
+          <h2>2. 评测</h2>
+
+          <h3>评测指标</h3>
+          <p><strong>Track 1</strong> 使用两个官方指标：</p>
+          <ol>
+            <li><strong>句子级 Macro-F1</strong> — 在所有标签上的平均 F1，衡量各类别的均衡表现。</li>
+            <li><strong>段落完全匹配（PEM, Paragraph Exact Match）</strong> — 仅当段落内<em>所有</em>句子标签均预测正确时，该段落才计为正确。</li>
+          </ol>
+          <p class="formula">Track 1 排名分数 = (Macro-F1 + PEM) / 2</p>
+
+          <p><strong>Track 2</strong> 使用两个官方指标：</p>
+          <ol>
+            <li><strong>标签 Macro-F1</strong> — 在四个支持关系标签上的宏平均 F1，衡量分类的均衡表现。</li>
+            <li><strong>Joint@3</strong> — 仅当系统预测了<strong>正确的支持关系标签</strong>，<em>且</em>在 top-3 证据段落预测中命中了<strong>至少一个正确的证据段落</strong>时，该预测才计为成功。</li>
+          </ol>
+          <p class="formula">Track 2 排名分数 = (Macro-F1 + Joint@3) / 2</p>
+          <p>对于 Track 2，当某条样本的 gold 证据段落列表为空时，仅当系统预测了<strong>正确的支持关系标签</strong>，<em>且</em>预测的证据段落列表也为空，Joint@3 才计为成功（即离线评测脚本的 <code>match-empty</code> 策略）。这是 Phase 1 公开排行榜与 Phase 2 隐藏测试集官方排名所使用的策略。</p>
+
+          <h3>两阶段评测</h3>
+          <p>评测分两个阶段进行，以兼顾开发灵活性与防止过拟合。</p>
+          <p><strong>第一阶段 — 公开评测（2026 年 5 月 26 日 – 6 月 20 日）：</strong><br>
+          第一阶段测试数据、baseline prompting 套件与离线评测脚本已于 5 月 26 日发布，详见仓库中的 <a class="link" href="https://github.com/NLP2CT/NLPCC-2026-Task10-Science/tree/main/data" target="_blank" rel="noreferrer">data/</a>、<a class="link" href="https://github.com/NLP2CT/NLPCC-2026-Task10-Science/tree/main/baseline_prompting" target="_blank" rel="noreferrer">baseline_prompting/</a> 和 <a class="link" href="https://github.com/NLP2CT/NLPCC-2026-Task10-Science/tree/main/offline_eval" target="_blank" rel="noreferrer">offline_eval/</a> 目录。参赛队伍须按官方格式将结果文件提交至 <a class="link" href="https://www.codabench.org/competitions/16666/" target="_blank" rel="noreferrer">Codabench 第一阶段平台</a> 以获得第一阶段分数。公开排行榜将持续开放至最终提交截止日。</p>
+          <p><strong>第二阶段 — 隐藏评测（2026 年 6 月 11 日 – 6 月 20 日）：</strong><br>
+          6 月 11 日，组织方将发布此前未对参赛者公开的隐藏测试集（不含标签）。参赛队伍须在该隐藏测试集上运行最终模型，并在提交截止日（6 月 20 日）前将结果文件提交至平台。</p>
+          <p><strong>最终得分：</strong><br>
+          最终排名分数为第一阶段（公开）与第二阶段（隐藏）得分的平均值。两阶段设计旨在抑制对公开测试数据的过拟合，更好地反映系统的泛化能力。</p>
+
+          <h3>数据发布与使用政策</h3>
+          <p>本共享任务发布的所有数据，包括训练/开发数据、公开测试数据和隐藏测试数据，在比赛期间仅限用于参加 NLPCC 2026 Shared Task 10。</p>
+          <p>在比赛期间，上述已发布数据的署名权及发布权均归组织方所有。参赛者及第三方不得以其他名义对数据进行二次分发、镜像发布、重新发布、重新命名，或创建替代性发布版本。</p>
+          <p>比赛结束后，所有任务数据，包括训练数据和测试数据，将以开放协议重新分发，并可用于科研用途。</p>
+
+          <h2>3. 提交要求</h2>
+          <p>每支参赛队伍须提交：</p>
+          <ol>
+            <li><strong>结果文件</strong>：按官方提交格式，将第一阶段（公开）和第二阶段（隐藏）的预测结果提交至平台。第一阶段公开平台为 <a class="link" href="https://www.codabench.org/competitions/16666/" target="_blank" rel="noreferrer">Codabench competition 16666</a>。</li>
+            <li><strong>技术报告</strong>，须全面描述以下内容：
+              <ul>
+                <li>训练数据来源及数据增强或预处理步骤</li>
+                <li>模型架构与设计选择（如适用）</li>
+                <li>提示策略或检索方案（如适用）</li>
+                <li>训练流程与超参数</li>
+                <li>评测方法及消融实验结果</li>
+              </ul>
+              技术报告须提供充分的细节以确保完全可复现。组织方保留对存在可复现性疑虑的提交要求提供<strong>验证材料</strong>（包括源代码、模型权重和训练脚本）的权利。
+            </li>
+          </ol>
+
+          <h2>4. 日程安排</h2>
+          <table>
+            <tr><th>日期</th><th>事项</th></tr>
+            <tr><td>2026 年 3 月 20 日</td><td>共享任务公告及征集参赛</td></tr>
+            <tr><td>2026 年 3 月 20 日</td><td>开放报名</td></tr>
+            <tr><td>2026 年 4 月 15 日</td><td>发布详细任务指南与训练数据</td></tr>
+            <tr><td>2026 年 5 月 25 日</td><td>报名截止</td></tr>
+            <tr><td>2026 年 5 月 26 日</td><td>发布第一阶段数据、评测入口和离线评测脚本</td></tr>
+            <tr><td>2026 年 6 月 11 日</td><td>发布隐藏测试数据（不含标签）<strong>（第二阶段开始）</strong></td></tr>
+            <tr><td>2026 年 6 月 20 日</td><td>参赛队伍提交所有结果的截止日（第一阶段 + 第二阶段）</td></tr>
+            <tr><td>2026 年 6 月 30 日</td><td>公布评测结果；征集系统报告</td></tr>
+          </table>
+
+          <h2>5. 常见问题（FAQ）</h2>
+
+          <p class="faq-q">Q：参赛队伍是否必须同时参加两个赛道？</p>
+          <p class="faq-a">A：不是。参赛队伍可以选择参加任一赛道或同时参加两个赛道，赛道独立评测。</p>
+
+          <p class="faq-q">Q：奖项如何评定？</p>
+          <p class="faq-a">A：我们遵循 NLPCC <a class="link" href="http://tcci.ccf.org.cn/conference/2026/shared-tasks/" target="_blank" rel="noreferrer">官方指导意见</a>。每个赛道的排名第一的队伍将获得由 NLPCC 和 CCF-NLP 联合颁发的证书。我们也在考虑为两个赛道综合平均分排名第一的队伍设立额外奖项（待确认）。</p>
+
+          <p class="faq-q">Q：Track 1 的每个样本是否只包含一份证据材料？</p>
+          <p class="faq-a">A：不是。一个证据材料包（evidence bundle）可能包含多份材料——例如结果段落加上一个或多个段落、表格或图表。系统应综合考虑所有提供的证据进行预测。</p>
+
+          <p class="faq-q">Q：Track 1 可能包含多模态输入（如表格或图表），参赛者是否必须使用端到端多模态模型？</p>
+          <p class="faq-a">A：不是。对系统设计不作任何限制，参赛者可以使用任何方案。</p>
+
+          <p class="faq-q">Q：Track 2 中，如果一条陈述引用了多篇文献怎么办？</p>
+          <p class="faq-a">A：每个 Track 2 数据样本均配对了被引论文。参赛者只需考虑该样本所提供的全文材料，任务不要求解析超出所给被引论文范围的引用。</p>
+
+          <p class="faq-q">Q：在第一阶段（公开评测）期间，可以多次向在线平台提交吗？</p>
+          <p class="faq-a">A：可以。参赛队伍可以在公开评测期间多次提交，排行榜将反映最新提交结果。</p>
+
+          <p class="faq-q">Q：是否可以使用发布的训练/开发数据以外的外部数据集或论文进行训练？</p>
+          <p class="faq-a">A：可以。训练数据来源不受限制。所有使用的外部数据源须在技术报告中披露。我们将在最终任务概述论文中分类总结各种方案，但训练数据的选择不影响评分与排名。</p>
+
+          <p class="faq-q">Q：是否可以在系统中通过 API 使用商业大语言模型（如 GPT-5、Claude）？</p>
+          <p class="faq-a">A：可以。但参赛者须在技术报告中清楚注明所使用的模型名称、版本（含请求日期）及 API 费用。</p>
+        </div>
+        <div class="footer">Copyright &copy; 2026 NLP2CT Lab, University of Macau. All Rights Reserved.</div>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        const en = document.getElementById("content-en");
+        const zh = document.getElementById("content-zh");
+        const btnEn = document.getElementById("btn-en");
+        const btnZh = document.getElementById("btn-zh");
+        const backLink = document.getElementById("back-link");
+
+        function setLang(lang) {
+          const isEn = lang === "en";
+          en.classList.toggle("active", isEn);
+          zh.classList.toggle("active", !isEn);
+          btnEn.setAttribute("aria-pressed", String(isEn));
+          btnZh.setAttribute("aria-pressed", String(!isEn));
+          document.documentElement.lang = isEn ? "en" : "zh-CN";
+          if (backLink) backLink.textContent = isEn ? "\u2190 Back to Home" : "\u2190 返回主页";
+          try { localStorage.setItem("lang", lang); } catch (e) {}
+        }
+
+        let initial = "en";
+        try {
+          const saved = localStorage.getItem("lang");
+          if (saved === "en" || saved === "zh") initial = saved;
+        } catch (e) {}
+        setLang(initial);
+
+        btnEn.addEventListener("click", function () { setLang("en"); });
+        btnZh.addEventListener("click", function () { setLang("zh"); });
+      })();
+    </script>
+  </body>
+</html>
