@@ -7,17 +7,16 @@ import evaluate
 import pandas as pd
 import numpy as np
 
-from transformers import BertForSequenceClassification, DataCollatorWithPadding
+from transformers import AutoModelForSequenceClassification, DataCollatorWithPadding
 from transformers import Trainer, TrainingArguments, EarlyStoppingCallback, TrainerCallback
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score, precision_score, recall_score
 import torch
 import torch.nn as nn
 
-from transformers.models.bert.tokenization_bert import BertTokenizerFast
+from transformers import AutoTokenizer
 
 # ===================== 【关键】你的所有标签（全部写在这里）=====================
-# 把你所有7种标签全部写进去，我先按常见科学论文证据标签给你补齐
 LABELS = [
     "Supported",
     "Unsupported Causal Mechanistic",
@@ -42,7 +41,7 @@ def load_all_json_data(json_path="C:/Users/Lenovo1/Desktop/NLPCC-2026-Task10-Sci
             for item in data.get("sentence_label", []):
                 sentence = item["sentence"]
                 tag = item.get("types", [None])[0]  # 取第一个标签
-                
+
                 # 只保留我们定义的标签
                 if tag and tag in label2id:
                     sentences.append(sentence)
@@ -72,7 +71,7 @@ if __name__ == '__main__':
     val_dataset = datasets.Dataset.from_pandas(val_df)
 
     # 分词器
-    tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
+    tokenizer = AutoTokenizer.from_pretrained('microsoft/deberta-base')
 
     def preprocess_function(examples):
         return tokenizer(examples['text'], truncation=True, max_length=512)
@@ -82,8 +81,8 @@ if __name__ == '__main__':
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
     # ===================== 模型：多分类 =====================
-    model = BertForSequenceClassification.from_pretrained(
-        'bert-base-uncased',
+    model = AutoModelForSequenceClassification.from_pretrained(
+        'microsoft/deberta-base',
         num_labels=len(label2id),
         id2label=id2label,
         label2id=label2id
@@ -94,7 +93,7 @@ if __name__ == '__main__':
     total_samples = len(df)
     class_weights = total_samples / (len(class_counts) * class_counts)
     class_weights_tensor = torch.FloatTensor(class_weights)
-    
+
     print("\n=== 类别分布 ===")
     for idx, (label, count) in enumerate(zip(LABELS, class_counts)):
         print(f"{label}: {count} samples, weight: {class_weights[idx]:.2f}")
@@ -106,11 +105,11 @@ if __name__ == '__main__':
             labels = inputs.pop("labels")
             outputs = model(**inputs)
             logits = outputs.logits
-            
+
             # 使用加权交叉熵损失
             loss_fct = nn.CrossEntropyLoss(weight=class_weights_tensor.to(logits.device))
             loss = loss_fct(logits, labels)
-            
+
             return (loss, outputs) if return_outputs else loss
 
     # 多分类评估指标
@@ -136,11 +135,12 @@ if __name__ == '__main__':
 
     # 训练参数
     training_args = TrainingArguments(
-        output_dir='./checkpoint',
+        output_dir='./checkpoint_deberta',
         num_train_epochs=50,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=16,
         warmup_steps=200,
+        learning_rate=1e-5,
         weight_decay=0.01,
         logging_dir='./logs',
         logging_steps=10,
@@ -166,8 +166,8 @@ if __name__ == '__main__':
     trainer.train()
 
     # 保存模型到指定位置
-    trainer.save_model('./my_bert_model')
-    tokenizer.save_pretrained('./my_bert_model')
+    trainer.save_model('./my_deberta_model')
+    tokenizer.save_pretrained('./my_deberta_model')
 
     # 训练完成
-    logger.info("训练完成！模型已支持多分类！")
+    logger.info("训练完成！DeBERTa模型已支持多分类！")

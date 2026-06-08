@@ -7,17 +7,16 @@ import evaluate
 import pandas as pd
 import numpy as np
 
-from transformers import BertForSequenceClassification, DataCollatorWithPadding
+from transformers import AutoModelForSequenceClassification, DataCollatorWithPadding
 from transformers import Trainer, TrainingArguments, EarlyStoppingCallback, TrainerCallback
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score, precision_score, recall_score
 import torch
 import torch.nn as nn
 
-from transformers.models.bert.tokenization_bert import BertTokenizerFast
+from transformers import AutoTokenizer
 
 # ===================== 【关键】你的所有标签（全部写在这里）=====================
-# 把你所有7种标签全部写进去，我先按常见科学论文证据标签给你补齐
 LABELS = [
     "Supported",
     "Unsupported Causal Mechanistic",
@@ -28,8 +27,10 @@ LABELS = [
 label2id = {label: idx for idx, label in enumerate(LABELS)}
 id2label = {v: k for k, v in label2id.items()}
 
+
 # ===================== 读取你的 JSON 数据 =====================
-def load_all_json_data(json_path="C:/Users/Lenovo1/Desktop/NLPCC-2026-Task10-Science-main (3)/NLPCC-2026-Task10-Science-main/data/traindev-track-1.jsonl"):
+def load_all_json_data(
+        json_path="C:/Users/Lenovo1/Desktop/NLPCC-2026-Task10-Science-main (3)/NLPCC-2026-Task10-Science-main/data/traindev-track-1.jsonl"):
     sentences = []
     labels = []
     with open(json_path, 'r', encoding='utf-8') as f:
@@ -42,7 +43,7 @@ def load_all_json_data(json_path="C:/Users/Lenovo1/Desktop/NLPCC-2026-Task10-Sci
             for item in data.get("sentence_label", []):
                 sentence = item["sentence"]
                 tag = item.get("types", [None])[0]  # 取第一个标签
-                
+
                 # 只保留我们定义的标签
                 if tag and tag in label2id:
                     sentences.append(sentence)
@@ -53,6 +54,7 @@ def load_all_json_data(json_path="C:/Users/Lenovo1/Desktop/NLPCC-2026-Task10-Sci
         "label": labels
     })
     return df
+
 
 # 加载数据
 df = load_all_json_data()
@@ -72,18 +74,20 @@ if __name__ == '__main__':
     val_dataset = datasets.Dataset.from_pandas(val_df)
 
     # 分词器
-    tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
+    tokenizer = AutoTokenizer.from_pretrained('roberta-base')
+
 
     def preprocess_function(examples):
         return tokenizer(examples['text'], truncation=True, max_length=512)
+
 
     tokenized_train = train_dataset.map(preprocess_function, batched=True)
     tokenized_val = val_dataset.map(preprocess_function, batched=True)
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
     # ===================== 模型：多分类 =====================
-    model = BertForSequenceClassification.from_pretrained(
-        'bert-base-uncased',
+    model = AutoModelForSequenceClassification.from_pretrained(
+        'roberta-base',
         num_labels=len(label2id),
         id2label=id2label,
         label2id=label2id
@@ -92,13 +96,18 @@ if __name__ == '__main__':
     # 计算类别权重（处理类别不平衡）
     class_counts = df['label'].value_counts().sort_index().values
     total_samples = len(df)
-    class_weights = total_samples / (len(class_counts) * class_counts)
+
+    # 使用更激进的权重公式：归一化到最小权重为1
+    class_weights = total_samples / class_counts
+    class_weights = class_weights / class_weights.min()
+
     class_weights_tensor = torch.FloatTensor(class_weights)
-    
-    print("\n=== 类别分布 ===")
+
+    print("\n=== 类别分布与权重 ===")
     for idx, (label, count) in enumerate(zip(LABELS, class_counts)):
-        print(f"{label}: {count} samples, weight: {class_weights[idx]:.2f}")
+        print(f"{label}: {count} samples, weight: {class_weights[idx]:.2f}x")
     print(f"总样本数: {total_samples}\n")
+
 
     # 自定义Trainer，添加加权损失
     class WeightedTrainer(Trainer):
@@ -106,15 +115,17 @@ if __name__ == '__main__':
             labels = inputs.pop("labels")
             outputs = model(**inputs)
             logits = outputs.logits
-            
+
             # 使用加权交叉熵损失
             loss_fct = nn.CrossEntropyLoss(weight=class_weights_tensor.to(logits.device))
             loss = loss_fct(logits, labels)
-            
+
             return (loss, outputs) if return_outputs else loss
+
 
     # 多分类评估指标
     metric = evaluate.load("accuracy")
+
 
     def compute_metrics(eval_pred):
         logits, labels = eval_pred
@@ -125,6 +136,7 @@ if __name__ == '__main__':
         macro_recall = recall_score(labels, predictions, average='macro')
         return {**accuracy, "f1": macro_f1, "precision": macro_precision, "recall": macro_recall}
 
+
     class EpochCallback(TrainerCallback):
         def on_evaluate(self, args, state, control, metrics=None, **kwargs):
             epoch = state.epoch
@@ -134,13 +146,15 @@ if __name__ == '__main__':
                     if key.startswith("eval_"):
                         print(f"  {key.replace('eval_', '')}: {value:.4f}")
 
+
     # 训练参数
     training_args = TrainingArguments(
-        output_dir='./checkpoint',
+        output_dir='./checkpoint_roberta',
         num_train_epochs=50,
         per_device_train_batch_size=8,
         per_device_eval_batch_size=16,
         warmup_steps=200,
+        learning_rate=2e-5,
         weight_decay=0.01,
         logging_dir='./logs',
         logging_steps=10,
@@ -159,15 +173,15 @@ if __name__ == '__main__':
         eval_dataset=tokenized_val,
         data_collator=data_collator,
         compute_metrics=compute_metrics,
-        callbacks=[EarlyStoppingCallback(early_stopping_patience=3), EpochCallback()]
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=8), EpochCallback()]
     )
 
     # 开始训练
     trainer.train()
 
     # 保存模型到指定位置
-    trainer.save_model('./my_bert_model')
-    tokenizer.save_pretrained('./my_bert_model')
+    trainer.save_model('./my_roberta_model')
+    tokenizer.save_pretrained('./my_roberta_model')
 
     # 训练完成
-    logger.info("训练完成！模型已支持多分类！")
+    logger.info("训练完成！RoBERTa模型已支持多分类！")
